@@ -14,7 +14,7 @@ women_matches = {
     'Clare': None
 }
 
-def create_stable_pair(men):
+def create_stable_pair(men, reversed=False):
     """
     Given a dictionary of men and women with their preferences of each other,
     match each male with a female such that it would produce a stable pair - 
@@ -22,12 +22,15 @@ def create_stable_pair(men):
     """
 
     # Iterate through the dictionary of men
-    for proposing_man in sorted(men.keys(), reverse=True):
+    for proposing_man in sorted(men.keys(), reverse=reversed):
         assign_woman(proposing_man, men, women_matches, women)
         print(women_matches)
 
 
 def assign_woman(proposing_man, preferrence_list, pairs, women):
+    """
+    Assigns a woman to the given proposing_man
+    """
     # Then check the man's list of preferrences of women
     for preferred_woman in preferrence_list[proposing_man]:
         # Check if the women has any partner
@@ -52,4 +55,4 @@ def assign_woman(proposing_man, preferrence_list, pairs, women):
     return
 
 
-create_stable_pair(men)
+create_stable_pair(men, True)
