@@ -1,75 +1,70 @@
-def split_array(array):
-    '''
-    Splits the array into n subarrays
-    Takes O(n) time complexity, due to the iteration within the input array "array"
-    This is more efficient than conducting a recursive split of the array until length becomes one,
-    since that will take O(nlog(n))
-    '''
+import math
 
-    splitted_array = [[num] for num in array]
-    return splitted_array
+def v2(array):
+    if len(array) == 1:
+        return {'left': [None], 'right': [None]}
 
-def get_closest_neightbour(left_array, right_array,
-    left_array_left, left_array_right, 
-    right_array_left, right_array_right):
-    
-    # Get the closest higher neighbour to the left, for right array
-    left_array_index = len(left_array)-1 # start from the right-most of the left array, knowing that you can keep following the index to the highest number on your left
+    mid_point = math.floor(len(array)/2)
+    left_array = array[:mid_point]
+    right_array = array[mid_point:]
+
+    left_array_output = v2(left_array)
+    right_array_output = v2(right_array)
+
+    # fill up the right array looking left
+    # in this case, we start on the left-hand side of the right array because we know that the biggest None will be on the right side,
+    # since it is looking at left, otherwise it would have been filled already
+    left_array_index = len(left_array)-1
 
     for index, value in enumerate(right_array):
-        if right_array_left[index] != None:
-            right_array_left[index] += len(left_array)
+        if right_array_output['left'][index] != None:
+            right_array_output['left'][index] += len(left_array)
             continue
 
         while left_array_index != None and value > left_array[left_array_index]:
-            ''' while the value of the current number we're in on the right array is greater than
+            '''
+            while the value of the current number we're in on the right array is greater than
             the value of left_array[left_array_index], then let's keep following the left_array_left
-            since we know it will always go to a bigger closest neighbour to the left'''
-            left_array_index = left_array_left[left_array_index]
+            since we know it will always go to a bigger closest neighbour to the left
+            '''
+            left_array_index = left_array_output['left'][left_array_index]
 
-        if left_array_index == None: # since we reached None in left_array_left, it means that we no longer have a bigger number required
+        if left_array_index == None: # since we reached None in left_array_output['left'], it means that we no longer have a bigger number required
+            right_array_output['left'][index] = None
             continue
 
-        right_array_left[index] = left_array_index
+        right_array_output['left'][index] = left_array_index
 
-    # Get the closest higher neighbour to the right, for the left array
-    right_array_index = 0 # start from teh left-most of the right array, knowing that you can keep following the index to the highest number on your right
+    combined_left = left_array_output['left'] + right_array_output['left']
 
-    for index, value in enumerate(reversed(left_array)): # start from the right-most of the left array
-        if left_array_right[index] != None:
+
+    # fill up the left array, looking right
+    # for this one, need to start from the right side of the left array, because we know that the biggest None looking right
+    # will be on the left-hand side, otherwise, it would have already been populated
+    right_array_index = 0
+
+    for left_counter in reversed(range(len(left_array))): # start from the right-most of the left array
+        if left_array_output['right'][left_counter] != None:
             continue
 
-        while right_array_index != None and value > right_array[right_array_index]:
-            right_array_index = right_array_right[right_array_index]
+        while right_array_index != None and left_array[left_counter] > right_array[right_array_index]:
+            right_array_index = right_array_output['right'][right_array_index]
         
         if right_array_index == None:
+            left_array_output['right'][left_counter] = None
             continue
 
-        left_array_right[index] = right_array_index + len(left_array)
+        left_array_output['right'][left_counter] = right_array_index + len(left_array)
 
-    right_array_right = list(map(lambda num: num+len(left_array) if num!= None else None, right_array_right))
+    right_array_output['right'] = list(map(lambda num: num+len(left_array) if num!= None else None, right_array_output['right']))
 
-    combined_left = left_array_left + right_array_left
-    combined_right = left_array_right + right_array_right
-    combined_numbers = left_array + right_array
-    output = [combined_numbers, combined_left, combined_right]
-    return output
+    combined_right = left_array_output['right'] + right_array_output['right']
 
-print(get_closest_neightbour([5,2,6,8],[1,4,3,9],[None,0, None, None],[2,2,3,None], [None,None,1,None], [1,3,3,None]))
+    return {'left': combined_left, 'right': combined_right}
 
-'''
-a = [1,2,3,4,5,6]
+A = [5,2,6,8,1,4,3,9]
 
-arrays = split_array(a)
-print(arrays)
-
-
-for i in range(len(arrays)):
-    left_array_left = [None for num in arrays[i]]
-    left_array_right = [None for num in arrays[i]]
-    right_array_left = [None for num in arrays[i]]
-    right_array_right = [None for num in arrays[i]]
-    get_closest_neightbour(arrays[i], arrays[i+1],
-        left_array_left, left_array_right,
-        right_array_left, right_array_right)
-'''
+results = v2(A)
+for side in results:
+    results[side] = list(map(str, results[side]))
+    print(','.join(results[side]))
