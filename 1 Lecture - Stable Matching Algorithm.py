@@ -1,20 +1,26 @@
 men = {
-    'Xavier': ['Amy', 'Bertha', 'Clare'],
-    'Yancey': ['Amy', 'Bertha', 'Clare'],
-    'Zeus': ['Amy', 'Bertha', 'Clare']
+    'A': ['V','X','W','Y','Z'],
+    'B': ['Y','V','Z','W','X'],
+    'C': ['W','X','Y','Z','V'],
+    'D': ['X','Y','W','V','Z'],
+    'E': ['V','W','Z','X','Y']
 }
 women = {
-    'Amy': ['Xavier', 'Yancey', 'Zeus'],
-    'Bertha': ['Xavier', 'Yancey', 'Zeus'],
-    'Clare': ['Xavier', 'Yancey', 'Zeus']
+    'V': ['B','C','E','A','D'],
+    'W': ['A','D','E','C','B'],
+    'X': ['C','A','B','E','D'],
+    'Y': ['D','B','C','A','E'],
+    'Z': ['C','D','A','B','E']
 }
 women_matches = {
-    'Amy': None,
-    'Bertha': None,
-    'Clare': None
+    'V':None,
+    'W':None,
+    'X':None,
+    'Y':None,
+    'Z':None
 }
 
-def create_stable_pair(men, reversed=False):
+def create_stable_pair(men, reversed=True):
     """
     Given a dictionary of men and women with their preferences of each other,
     match each male with a female such that it would produce a stable pair - 
