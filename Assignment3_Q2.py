@@ -85,8 +85,16 @@ def is_cut_required_v2(room_array):
     return False
 
 
-
+# Test Case: True - tile needs to be cut
+print("Test Case 1")
 print(is_cut_required_v2([[True,True,True],
-                [True, False, True],
-                [True, False, True],
-                [True, False, True]]))
+                [False, True, True],
+                [False, False, True],
+                [True, True, True]]))
+
+# Test Case: False - no tile needs to be cut
+print("Test Case 2")
+print(is_cut_required_v2([[True,True,True],
+                [False, False, True],
+                [False, False, True],
+                [True, True, True]]))
