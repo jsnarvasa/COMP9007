@@ -13,69 +13,75 @@ def is_cut_required_v2(room_array):
         for c_index, column in enumerate(row):
 
             if column == True:
-                adjacency_list[r_index, c_index] = []
+                adjacency_list[r_index, c_index] = {}
+                adjacency_list[r_index, c_index]['neighbours'] = []
+                adjacency_list[r_index, c_index]['num_neighbours'] = 0
 
             # check surrounding for other True tiles
                 if r_index > 0 and room_array[r_index-1][c_index] == True: # check north
-                    adjacency_list[r_index, c_index].append([r_index-1, c_index])
+                    adjacency_list[r_index, c_index]['neighbours'].append([r_index-1, c_index])
                 if r_index < len(room_array)-1 and room_array[r_index+1][c_index] == True: # check south
-                    adjacency_list[r_index, c_index].append([r_index+1, c_index])
+                    adjacency_list[r_index, c_index]['neighbours'].append([r_index+1, c_index])
                 if c_index > 0 and room_array[r_index][c_index-1] == True: # check east
-                    adjacency_list[r_index, c_index].append([r_index, c_index-1])
+                    adjacency_list[r_index, c_index]['neighbours'].append([r_index, c_index-1])
                 if c_index < len(row)-1 and room_array[r_index][c_index+1] == True: # check west
-                    adjacency_list[r_index, c_index].append([r_index, c_index+1])
+                    adjacency_list[r_index, c_index]['neighbours'].append([r_index, c_index+1])
 
     # We need to know how many neighbours each tileable segment has
-    num_tile_neighbours = []
-    for tileable in adjacency_list:
-        num_neighbours = len(adjacency_list[tileable])
-        num_tile_neighbours.append([tileable, num_neighbours])
+    for segment in adjacency_list:
+        adjacency_list[segment]['num_neighbours'] = len(adjacency_list[segment]['neighbours'])
+            
 
-    # now iterate through the list containing the num of neighbours
-    while num_tile_neighbours:
-        # Now sort it from smallest to largest num of neighbours
-        num_tile_neighbours = sorted(num_tile_neighbours, key=lambda x: x[1], reverse=False)
+    # Now, we keep this loop going, while there are still tileable segments that are not done
+    while bool(adjacency_list):
+        
+         # 4 is the max number of neighbours a tile can have (not arbitrary num)
+        smallest_neighbour_count = 4
+        smallest_neighbour = tuple()
+        for segment in adjacency_list:
+            if adjacency_list[segment]['num_neighbours'] < smallest_neighbour_count:
+                smallest_neighbour = tuple(segment)
+                smallest_neighbour_count = adjacency_list[segment]['num_neighbours']
+
+        # Starting from the segment that we know has the smallest num of neighbours
 
         # Return True because you found a tileable segment which DOES NOT have a tileable neighbour
-        # We will hit this point either at the very start of the iteration - where there is an isolated tileable segment
-        # Middle or at the very end where teh remaining tile has no more available segment
-        if num_tile_neighbours[0][1] == 0:
+        if smallest_neighbour_count == 0:
             return True
         
-        # Now we are guaranteed to have the first array which has number of neighbours as 1 (since it's sorted in ASC order)
-        # There will always be a tile which only has one tileable neighbour, we start with this
-        segment_2_visit = num_tile_neighbours[0][0]
-
-        paired_segment = tuple()
-        # Need to make sure to pair with the neighbour with the least number of neighbours
-        for index, val in enumerate(num_tile_neighbours):
-            if index == 0:
-                continue # skip the first index since you are looking for a tile to match this with
-
-            if list(val[0]) in adjacency_list[segment_2_visit]:
-                paired_segment = tuple(val[0])
-                break
-
-        # Here, we are reducing the number of tileable neighbours for the two segments by 1 - because the two are now tiled by 1 tile
-        num_tile_neighbours[0][1] -=1
-        for index, segment in enumerate(num_tile_neighbours):
-            if segment[0] == paired_segment:
-                num_tile_neighbours[index][1] -= 1
-                break
+        # From the segment that we are in, look for one of it's adjacent segments that has the smallest num of other adjacent tiles
+        smallest_other_neighbour_count = 4
+        smallest_other_neighbour = tuple()
+        for segment in adjacency_list[smallest_neighbour]['neighbours']:
+            segment = tuple(segment)
+            if segment in adjacency_list and adjacency_list[segment]['num_neighbours'] < smallest_other_neighbour_count:
+                smallest_other_neighbour = segment
+                smallest_other_neighbour_count = adjacency_list[segment]['num_neighbours']
         
-        # Note, we don't need to update our adjacency_list - because, when choosing for the paired_segment, we choose from
-        # the smallest segment in num_tile_neighbours.  Therefore, even though a segment may already have been paired with another tile
-        # but we keep that segment within our adjacency_list, it will never be selected because we choose on what's num_tile_neighbours
-        # which is always updated
+        # If not able to find an AVAILABLE adjacent segment (meaning a tileable neighbour - not already tiled), then means we have an isolated segment
+        if bool(smallest_other_neighbour) == False:
+            return True
 
-        # Remove the index array if it reaches 0 - which it should.  This allows us to keep just looking at index 0 throughout the whole while loop
-        # we only need to check the first two - it is impossible to get 3 indexes to turn 0 in one turn (since we only reduce by 1 for two items above)
-        # First is segment_2_visit and second is paired_segment - if we do delete two here, that means we finished and no tiles needs to be cut
-        for index in range(2):
-            if num_tile_neighbours[0][1] == 0:
-                print(f"deleted {num_tile_neighbours[0]}")
-                del num_tile_neighbours[0]
+        # Now, we've found a segment that needs to be tile, as well as an adjacent segment to it - that has the least num of neighbours
+        # We will pair the two with one tile.  But first need to update the num of tileable neighbours of the two segments, to reflect this change
+        for adjacent_segments in adjacency_list[smallest_neighbour]['neighbours']:
+            adjacent_segments = tuple(adjacent_segments)
+            if adjacent_segments in adjacency_list:
+                adjacency_list[adjacent_segments]['num_neighbours'] -= 1
 
+        for adjacent_segments in adjacency_list[smallest_other_neighbour]['neighbours']:
+            adjacent_segments = tuple(adjacent_segments)
+            if adjacent_segments in adjacency_list:
+                adjacency_list[adjacent_segments]['num_neighbours'] -= 1
+
+        # Delete the two (just) tiled segments from our adjacency list
+        adjacency_list.pop(smallest_neighbour)
+        adjacency_list.pop(smallest_other_neighbour)
+
+        # If we only have one tileable segment left, then it's not possible to pair it with another segment.  Need to cut tile.
+        if len(adjacency_list) == 1:
+            return True
+    
     return False
 
 
@@ -83,4 +89,4 @@ def is_cut_required_v2(room_array):
 print(is_cut_required_v2([[True,True,True],
                 [True, False, True],
                 [True, False, True],
-                [False, False, True]]))
+                [True, False, True]]))
