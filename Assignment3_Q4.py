@@ -49,13 +49,15 @@ def winning_sequence(num_array, colour_array, current_pos):
     return max_increasing_sequence+1
 
 
-def wrapper_function(num_array, colour_array, current_pos):
+def wrapper_function(num_array, colour_array):
     '''
     A wrapper array for the actual recursion function.
     We'll use this to extract the winning indices and transform it to the array - which is the expected output
     '''
 
-    winning_sequence(num_array, colour_array, current_pos)
+    for index in range(len(num_array)):
+        if index not in longest_sequence_memo:
+            winning_sequence(num_array, colour_array, index)
 
     winning_moves = []
     for key in longest_sequence_memo:
@@ -65,8 +67,24 @@ def wrapper_function(num_array, colour_array, current_pos):
 
     winning_moves_index = [turn[0] for turn in winning_moves]
 
-    return winning_moves_index
+    output = ','.join([str(index) for index in winning_moves_index])
+    print(output)
 
-print(wrapper_function([9,6,9,3,8,9,2,0,4,12],
-                ["r","g","r","g","r","g","r","r","r","g"],
-                0))
+
+print("Test Case 1")
+longest_sequence_memo.clear()
+wrapper_function([9,6,9,3,8,9,2,0,4,12],
+                ["r","g","r","g","r","g","r","r","r","g"])
+print(longest_sequence_memo)
+
+print("Test Case 2")
+longest_sequence_memo.clear()
+wrapper_function([1, 2, 3, 4, 5, 6, 7, 10],
+                ["r","r","r","r","r","r","r","r"])
+print(longest_sequence_memo)
+
+print("Test Case 3")
+longest_sequence_memo.clear()
+wrapper_function([5, 3, 2, 0, 24, 9, 20],
+                ["g","g","g","g","r","r","g"])
+print(longest_sequence_memo)
