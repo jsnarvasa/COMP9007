@@ -1,4 +1,4 @@
-def is_cut_required_v2(room_array):
+def is_cut_required(room_array):
     '''
     INPUT: double-sided array - which is the layout of the room with True or False values
     OUTPUT: True or False boolean - True if the room_array is such that a 2x1 tile will need to be cut, False if tile/s doesn't need to be cut
@@ -87,14 +87,14 @@ def is_cut_required_v2(room_array):
 
 # Test Case: True - tile needs to be cut
 print("Test Case 1")
-print(is_cut_required_v2([[True,True,True],
+print(is_cut_required([[True,True,True],
                 [False, True, True],
                 [False, False, True],
                 [True, True, True]]))
 
 # Test Case: False - no tile needs to be cut
 print("Test Case 2")
-print(is_cut_required_v2([[True,True,True],
+print(is_cut_required([[True,True,True],
                 [False, False, True],
                 [False, False, True],
                 [True, True, True]]))
